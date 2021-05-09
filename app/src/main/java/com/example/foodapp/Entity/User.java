@@ -1,9 +1,9 @@
-package com.example.foodapp.user;
+package com.example.foodapp.Entity;
 
 public class User {
     private String username, password, name, email, phone, address;
 
-    public User( String username, String password) {
+    public User(String username, String password) {
         this.username = username;
         this.password = password;
     }

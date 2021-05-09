@@ -7,8 +7,8 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import com.example.foodapp.databasehelper.Database;
-import com.example.foodapp.util.Util;
+import com.example.foodapp.Databasehelper.Database;
+import com.example.foodapp.Util.Util;
 
 public class LoginActivity extends AppCompatActivity {
 
@@ -18,9 +18,9 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        if(Util.db == null){
+        if(Util.user_db == null){
             Log.d(Util.DEBUG, "Create Database");
-            Util.db = new Database(this,null);
+            Util.user_db = new Database(this,null);
         }
 
         username = findViewById(R.id.login_et_username);
@@ -32,10 +32,12 @@ public class LoginActivity extends AppCompatActivity {
         String pass = password.getText().toString();
         long result;
         if(!(user.equals("") || pass.equals(""))){
-            result = Util.db.fetchUser(user,pass);
+            result = Util.user_db.fetchUser(user,pass);
             Log.d(Util.DEBUG, "resutl: " + result);
             if(result > 0){
-                startActivity(new Intent(this, HomeActivity.class));
+                Intent intent = new Intent(this, HomeActivity.class);
+                intent.putExtra(Util.USER_ID, result);
+                startActivity(intent);
                 finish();
             }else {
                 Toast.makeText(this, "Incorrect Username or Password!", Toast.LENGTH_LONG).show();

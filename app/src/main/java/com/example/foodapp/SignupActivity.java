@@ -6,8 +6,10 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import com.example.foodapp.user.User;
-import com.example.foodapp.util.Util;
+import com.example.foodapp.Databasehelper.FoodDatabase;
+import com.example.foodapp.Entity.Food;
+import com.example.foodapp.Entity.User;
+import com.example.foodapp.Util.Util;
 
 public class SignupActivity extends AppCompatActivity {
 
@@ -31,6 +33,7 @@ public class SignupActivity extends AppCompatActivity {
         String fname = name.getText().toString();
         String add = address.getText().toString();
         String ph = phone.getText().toString();
+
         long result = 0;
         if(!(user.equals("") || pass.equals(""))){
             User u = new User(user, pass);
@@ -38,15 +41,16 @@ public class SignupActivity extends AppCompatActivity {
             u.setName(fname);
             u.setEmail(e_mail);
             u.setPhone(ph);
-            result = Util.db.addUser(u);
+            result = Util.user_db.addUser(u);
+            if(result > 0){
+                Toast.makeText(this, "User Created!", Toast.LENGTH_LONG).show();
+                startActivity(new Intent(this, LoginActivity.class));
+                finish();
+            }else {
+                Toast.makeText(this, "Fail to create a new User!", Toast.LENGTH_LONG).show();
+            }
         }
-        if(result > 0){
-            Toast.makeText(this, "User Created!", Toast.LENGTH_LONG).show();
-            startActivity(new Intent(this, LoginActivity.class));
-            finish();
-        }else {
-            Toast.makeText(this, "Fail to create a new User!", Toast.LENGTH_LONG).show();
-        }
+
 
     }
 }
