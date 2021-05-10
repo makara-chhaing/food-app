@@ -9,16 +9,20 @@ import android.widget.TextView;
 import androidx.annotation.NonNull;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.foodapp.Databasehelper.Database;
+import com.example.foodapp.Entity.Food;
 import com.example.foodapp.R;
+import com.example.foodapp.Util.Util;
+
+import java.util.List;
 
 public class FoodAdapter extends RecyclerView.Adapter<FoodAdapter.FoodAdapterViewHolder> {
 
     Context context;
-    Database database;
+    Database database = Util.fooduser_db;
+    List<Food> foodList;
 
     public FoodAdapter(Context context, Database database){
         this.context = context;
-        this.database = database;
     }
     @NonNull
     @Override

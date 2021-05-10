@@ -18,9 +18,9 @@ public class LoginActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_login);
 
-        if(Util.user_db == null){
+        if(Util.fooduser_db == null){
             Log.d(Util.DEBUG, "Create Database");
-            Util.user_db = new Database(this,null);
+            Util.fooduser_db = new Database(this,null);
         }
 
         username = findViewById(R.id.login_et_username);
@@ -32,8 +32,8 @@ public class LoginActivity extends AppCompatActivity {
         String pass = password.getText().toString();
         long result;
         if(!(user.equals("") || pass.equals(""))){
-            result = Util.user_db.fetchUser(user,pass);
-            Log.d(Util.DEBUG, "resutl: " + result);
+            result = Util.fooduser_db.fetchUser(user,pass);
+            Log.d(Util.DEBUG, "result: " + result);
             if(result > 0){
                 Intent intent = new Intent(this, HomeActivity.class);
                 intent.putExtra(Util.USER_ID, result);

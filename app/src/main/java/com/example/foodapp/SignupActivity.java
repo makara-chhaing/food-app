@@ -6,8 +6,6 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
-import com.example.foodapp.Databasehelper.FoodDatabase;
-import com.example.foodapp.Entity.Food;
 import com.example.foodapp.Entity.User;
 import com.example.foodapp.Util.Util;
 
@@ -41,7 +39,7 @@ public class SignupActivity extends AppCompatActivity {
             u.setName(fname);
             u.setEmail(e_mail);
             u.setPhone(ph);
-            result = Util.user_db.addUser(u);
+            result = Util.fooduser_db.addUser(u);
             if(result > 0){
                 Toast.makeText(this, "User Created!", Toast.LENGTH_LONG).show();
                 startActivity(new Intent(this, LoginActivity.class));
