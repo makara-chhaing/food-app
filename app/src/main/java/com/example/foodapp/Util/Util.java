@@ -3,6 +3,7 @@ package com.example.foodapp.Util;
 import com.example.foodapp.Databasehelper.Database;
 
 public class Util {
+
     public  static Database fooduser_db;
     public static final String DEBUG = "databaseCreate1";
     public static final int DATABASE_VERSION = 1;
@@ -25,6 +26,9 @@ public class Util {
     public static final String FOOD_NAME = "food_name";
     public static final String FOOD_DESCRIPTION = "food_description";
 
-    public static final String USER_FOOD_TABLE_NAME = "food_table";
+    public static final String USER_FOOD_TABLE_NAME = "user_food_table";
+
+
+    public static final String LOGIN_STATE = "login_state";
 
 }
