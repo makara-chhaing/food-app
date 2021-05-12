@@ -3,6 +3,8 @@ package com.example.foodapp;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.util.Log;
+import android.view.Menu;
+import android.view.MenuInflater;
 import android.widget.TextView;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
@@ -25,29 +27,32 @@ public class HomeActivity extends AppCompatActivity {
             Log.d(Util.DEBUG, "Create Database");
             Util.fooduser_db = new Database(this,null);
         }
+        long userID = 0;
         Intent intent = getIntent();
         sharedPreferences = getSharedPreferences(Util.LOGIN_STATE, MODE_PRIVATE);
+        if(intent != null){
+            userID = intent.getLongExtra(Util.USER_ID, 0);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putInt(Util.USER_ID, (int) userID);
+            editor.commit();
+        }
+
         int loginState = sharedPreferences.getInt(Util.USER_ID, 0);
-        if(intent==null || loginState == 0){
+        Log.d(Util.DEBUG, "loginstate: " + loginState);
+        if( loginState == 0) {
             startActivity(new Intent(this, LoginActivity.class));
         }
 
-
-
-        if(intent != null){
-            long userID = intent.getLongExtra(Util.USER_ID, 0);
-            SharedPreferences.Editor editor = sharedPreferences.edit();
-            editor.putInt(Util.USER_ID, (int) userID);
-            editor.apply();
+        if( loginState > 0){
             Food cake = new Food("Cake");
-            cake.setUserID((int)userID);
+            cake.setUserID((int)loginState);
             cake.setDescription("yummmmmm");
             cake.setImgID(1);
-            Log.d(Util.DEBUG, userID + " <- userID for food");
+            Log.d(Util.DEBUG, loginState + " <- userID for food");
             long fooduserId = Util.fooduser_db.addFood(cake);
             Log.d(Util.DEBUG, fooduserId + " <- userID for food");
 
-            List<Food> foodList = Util.fooduser_db.fetchFood((int)userID);
+            List<Food> foodList = Util.fooduser_db.fetchFood(loginState);
             Log.d(Util.DEBUG, "food size: " + foodList.size());
             if(foodList.size() > 0){
                 Food food = foodList.get(0);
@@ -57,8 +62,22 @@ public class HomeActivity extends AppCompatActivity {
                 id1.setText(food.getFoodId() + "");
                 des1 = findViewById(R.id.fooddescription);
                 des1.setText(food.getDescription());
+
+
             }
+
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putInt(Util.USER_ID, loginState);
+            editor.commit();
         }
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        if(loginState > 0){
+            editor.putInt(Util.USER_ID, loginState);
+        }else if (userID > 0){
+            editor.putInt(Util.USER_ID, (int) userID);
+        }
+
+        editor.commit();
 
 
         recyclerView = findViewById(R.id.recyclerView);
@@ -70,5 +89,13 @@ public class HomeActivity extends AppCompatActivity {
 
 //        FoodAdapter adapter = new FoodAdapter(this);
 //        recyclerView.setAdapter();
+    }
+
+    @Override
+    public boolean onCreateOptionsMenu(Menu menu) {
+        MenuInflater inflater = getMenuInflater();
+        inflater.inflate(R.menu.foodmenu, menu);
+        return true;
+
     }
 }
