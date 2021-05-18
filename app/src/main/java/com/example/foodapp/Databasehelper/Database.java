@@ -127,4 +127,32 @@ public class Database extends SQLiteOpenHelper {
 
         return list;
     }
+
+    public List<Food> fetchAllFood(){
+        List<Food> list = new ArrayList<>();
+        SQLiteDatabase db = this.getReadableDatabase();
+        String query = "SELECT " + Util.FOOD_ID + "," + Util.FOOD_NAME + "," + Util.FOOD_IMAGE + "," + Util.FOOD_DESCRIPTION + "," + Util.OWNER_ID + " FROM " + Util.FOOD_TABLE_NAME +
+                " JOIN " + Util.USER_TABLE_NAME + " ON " + Util.FOOD_TABLE_NAME + "." + Util.USER_ID + "=" +
+                Util.USER_TABLE_NAME + "." + Util.USER_ID;
+        Cursor c = db.rawQuery(query, null);
+        if(c.moveToNext()){
+            do{
+                int foodID = c.getInt(0);
+                String name = c.getString(1);
+                byte[] foodImg = c.getBlob (2);
+                String des = c.getString(3);
+                int owner = c.getInt(4);
+                Food food = new Food(name);
+                food.setDescription(des);
+                Bitmap img = BitmapFactory.decodeByteArray(foodImg,0, foodImg.length);
+                food.setImgBitmap(img);
+                food.setOwnerID(owner);
+                list.add(food);
+            }while (c.moveToNext());
+        }
+        c.close();
+        db.close();
+
+        return list;
+    }
 }

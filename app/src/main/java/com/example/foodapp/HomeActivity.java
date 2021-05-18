@@ -7,7 +7,6 @@ import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.TextView;
 import android.widget.Toast;
 import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
@@ -16,15 +15,11 @@ import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 import com.example.foodapp.Adapter.FoodAdapter;
 import com.example.foodapp.Databasehelper.Database;
-import com.example.foodapp.Entity.Food;
-import com.example.foodapp.Entity.User;
 import com.example.foodapp.Util.Util;
-
-import java.util.List;
 
 public class HomeActivity extends AppCompatActivity {
     RecyclerView recyclerView;
-    int userID;
+    int userID, out;
     SharedPreferences sharedPreferences;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,6 +30,9 @@ public class HomeActivity extends AppCompatActivity {
             Util.fooduser_db = new Database(this,null);
         }
         Intent intent = getIntent();
+        if(intent.getIntExtra("out",0)==1){
+            signOut();
+        }
         sharedPreferences = getSharedPreferences(Util.LOGIN_STATE, MODE_PRIVATE);
         if(intent.getIntExtra(Util.USER_ID, 0)==0){
             if(sharedPreferences.getInt(Util.USER_ID, 0) == 0){
@@ -53,8 +51,7 @@ public class HomeActivity extends AppCompatActivity {
         }
         recyclerView = findViewById(R.id.recyclerView);
         try {
-            Toast.makeText(this, userID+" : <= ID", Toast.LENGTH_LONG).show();
-            FoodAdapter adapter = new FoodAdapter(this, Util.fooduser_db.fetchFood(userID));
+            FoodAdapter adapter = new FoodAdapter(this, Util.fooduser_db.fetchAllFood());
             recyclerView.setLayoutManager(new LinearLayoutManager(this, RecyclerView.VERTICAL,false));
             recyclerView.setAdapter(adapter);
 
@@ -107,11 +104,17 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private void openMylist() {
-
+        Intent intent = new Intent(this, MyListActivity.class);
+        intent.putExtra(Util.USER_ID, userID);
+        startActivity(intent);
+        finish();
     }
 
     private void openHome() {
-
+        Intent intent = new Intent(this, HomeActivity.class);
+        intent.putExtra(Util.USER_ID, userID);
+        startActivity(intent);
+        finish();
     }
 
     private void openAccount() {
