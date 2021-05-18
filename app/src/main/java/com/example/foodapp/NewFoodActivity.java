@@ -1,6 +1,10 @@
 package com.example.foodapp;
 
+import android.Manifest;
+import android.app.AlertDialog;
+import android.content.DialogInterface;
 import android.content.Intent;
+import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.provider.MediaStore;
@@ -9,16 +13,20 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
+import androidx.core.app.ActivityCompat;
+import androidx.core.content.ContextCompat;
 import com.example.foodapp.Entity.Food;
 import com.example.foodapp.Util.Util;
 
 import java.io.IOException;
 
 public class NewFoodActivity extends AppCompatActivity {
-ImageView imageView;
+    private static final int PERMISSION_REQUEST_READ_FOLDERS = 1;
+    ImageView imageView;
 TextView imageText, title, description, location, time;
 Uri imageUri;
 Bitmap imageBitmap;
@@ -41,10 +49,34 @@ int userId;
 
     public void addImage(View v){
         try {
-            Intent intent = new Intent();
-            intent.setType("image/*");
-            intent.setAction(Intent.ACTION_GET_CONTENT);
-            startActivityForResult(intent, 1);
+            if(ContextCompat.checkSelfPermission(this,Manifest.permission.READ_EXTERNAL_STORAGE) != PackageManager.PERMISSION_GRANTED){
+                if(ActivityCompat.shouldShowRequestPermissionRationale(this,Manifest.permission.READ_EXTERNAL_STORAGE)){
+                    new AlertDialog.Builder(this)
+                            .setTitle("Permission needed!")
+                            .setMessage("This is required!")
+                            .setPositiveButton("ok", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    ActivityCompat.requestPermissions(NewFoodActivity.this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSION_REQUEST_READ_FOLDERS);
+                                }
+                            })
+                            .setNegativeButton("cancel", new DialogInterface.OnClickListener() {
+                                @Override
+                                public void onClick(DialogInterface dialog, int which) {
+                                    dialog.dismiss();
+                                }
+                            })
+                    .create()
+                    .show();
+                }else {
+                    ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.READ_EXTERNAL_STORAGE}, PERMISSION_REQUEST_READ_FOLDERS);
+                }
+            }else {
+                Intent intent = new Intent();
+                intent.setType("image/*");
+                intent.setAction(Intent.ACTION_GET_CONTENT);
+                startActivityForResult(intent, 1);
+            }
 
         }catch (Exception e){
             Log.e(Util.DEBUG, "Error Adding Image!");
@@ -65,6 +97,18 @@ int userId;
         } catch (Exception e) {
             Log.d("result: ",  " :Error addfoof?");
             e.printStackTrace();
+        }
+    }
+
+    @Override
+    public void onRequestPermissionsResult(int requestCode, @NonNull String[] permissions, @NonNull int[] grantResults) {
+        super.onRequestPermissionsResult(requestCode, permissions, grantResults);
+        if(requestCode==PERMISSION_REQUEST_READ_FOLDERS){
+            if(grantResults.length > 0 && grantResults[0] == PackageManager.PERMISSION_GRANTED){
+                Toast.makeText(this, "Permission Granted!", Toast.LENGTH_LONG).show();
+            }else {
+                Toast.makeText(this, "Permission Denied!", Toast.LENGTH_LONG).show();
+            }
         }
     }
 

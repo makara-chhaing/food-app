@@ -5,9 +5,11 @@ import android.content.SharedPreferences;
 import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
+import android.view.MenuItem;
 import android.view.View;
 import android.widget.TextView;
 import android.widget.Toast;
+import androidx.annotation.NonNull;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
 import androidx.recyclerview.widget.LinearLayoutManager;
@@ -72,6 +74,47 @@ public class HomeActivity extends AppCompatActivity {
         MenuInflater inflater = getMenuInflater();
         inflater.inflate(R.menu.foodmenu, menu);
         return true;
+
+    }
+
+    @Override
+    public boolean onOptionsItemSelected(@NonNull MenuItem item) {
+        switch (item.getItemId()) {
+            case R.id.account:
+                openAccount();
+                return true;
+            case R.id.home:
+                openHome();
+                return true;
+            case R.id.mylist:
+                openMylist();
+                return true;
+            case R.id.signout:
+                signOut();
+                return true;
+            default:
+                return super.onOptionsItemSelected(item);
+        }
+    }
+
+    private void signOut() {
+        sharedPreferences = getSharedPreferences(Util.LOGIN_STATE, MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putInt(Util.USER_ID, 0);
+        editor.commit();
+        startActivity(new Intent(this, LoginActivity.class));
+        finish();
+    }
+
+    private void openMylist() {
+
+    }
+
+    private void openHome() {
+
+    }
+
+    private void openAccount() {
 
     }
 }

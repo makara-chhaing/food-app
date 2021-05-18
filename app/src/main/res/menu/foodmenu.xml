@@ -1,9 +1,11 @@
 <?xml version="1.0" encoding="utf-8"?>
 <menu xmlns:android="http://schemas.android.com/apk/res/android">
-    <item android:id="@+id/new_game"
-        android:title="new_game" />
-    <item android:id="@+id/help"
-        android:title="help" />
-    <item android:id="@+id/mylis"
-        android:title="mylist" />
+    <item android:id="@+id/home"
+        android:title="Home" />
+    <item android:id="@+id/account"
+        android:title="Account" />
+    <item android:id="@+id/mylist"
+        android:title="My List" />
+    <item android:id="@+id/signout"
+        android:title="Sign Out" />
 </menu>
