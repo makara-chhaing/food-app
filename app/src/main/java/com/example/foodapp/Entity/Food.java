@@ -1,11 +1,24 @@
 package com.example.foodapp.Entity;
 
+import android.graphics.Bitmap;
+
 public class Food {
     String name;
     String description;
-    int imgID;
+    Bitmap imgBitmap;
     int foodId;
     int userID;
+    int ownerID;
+
+    public int getOwnerID() {
+        return ownerID;
+    }
+
+    public void setOwnerID(int ownerID) {
+        this.ownerID = ownerID;
+    }
+
+
 
     public int getUserID() {
         return userID;
@@ -29,12 +42,12 @@ public class Food {
 
 
 
-    public int getImgID() {
-        return imgID;
+    public Bitmap getImgBitmap() {
+        return imgBitmap;
     }
 
-    public void setImgID(int imgID) {
-        this.imgID = imgID;
+    public void setImgBitmap(Bitmap imgBitmap) {
+        this.imgBitmap = imgBitmap;
     }
 
     public Food(String name){

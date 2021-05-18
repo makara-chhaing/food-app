@@ -22,7 +22,8 @@ public class Util {
 
     public static final String FOOD_TABLE_NAME = "food_table";
     public static final String FOOD_ID = "food_id";
-    public static final String FOOD_IMAGE_ID = "food_img_id";
+    public static final String OWNER_ID = "owner_id";
+    public static final String FOOD_IMAGE = "food_img";
     public static final String FOOD_NAME = "food_name";
     public static final String FOOD_DESCRIPTION = "food_description";
 

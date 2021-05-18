@@ -5,20 +5,23 @@ import android.content.Context;
 import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.database.sqlite.SQLiteOpenHelper;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.util.Log;
 import androidx.annotation.Nullable;
 import com.example.foodapp.Entity.Food;
 import com.example.foodapp.Entity.User;
 import com.example.foodapp.Util.Util;
 
+import java.io.ByteArrayOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
 public class Database extends SQLiteOpenHelper {
+
     public Database(@Nullable Context context, @Nullable SQLiteDatabase.CursorFactory factory) {
         super(context, Util.DATABASE_NAME, factory, Util.DATABASE_VERSION);
     }
-
 
     @Override
     public void onCreate(SQLiteDatabase db) {
@@ -26,24 +29,17 @@ public class Database extends SQLiteOpenHelper {
                 + Util.USERNAME + " TEXT, " + Util.NAME + " TEXT," + Util.ADDRESS + " TEXT," + Util.EMAIL + " TEXT,"
                 + Util.PHONE + " INTEGER," +  Util.PASSWORD + " TEXT)";
         String CREATE_FOOD_TABLE = "CREATE TABLE " + Util.FOOD_TABLE_NAME + " (" + Util.FOOD_ID + " INTEGER PRIMARY KEY AUTOINCREMENT, "
-                + Util.FOOD_NAME + " TEXT, " + Util.FOOD_IMAGE_ID + " INTEGER," + Util.FOOD_DESCRIPTION + " TEXT, " + Util.USER_ID + " INTEGER)";
-        String CREATE_USER_FOOD_TABLE = "CREATE TABLE " + Util.USER_FOOD_TABLE_NAME + " (" + Util.FOOD_ID + " INTEGER PRIMARY KEY, "
-                + Util.USER_ID + " INTEGER )";
+                + Util.FOOD_NAME + " TEXT, " + Util.FOOD_IMAGE + " BLOB," + Util.FOOD_DESCRIPTION + " TEXT, " + Util.OWNER_ID + " INTEGER, " + Util.USER_ID + " INTEGER)";
         db.execSQL(CREATE_USER_TABLE);
         db.execSQL(CREATE_FOOD_TABLE);
-//        db.execSQL(CREATE_USER_FOOD_TABLE);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
-        String DROP_TABLE = "DROP TABLE IF EXISTS " + Util.USER_FOOD_TABLE_NAME;
-        db.execSQL(DROP_TABLE);
-        DROP_TABLE = "DROP TABLE IF EXISTS " + Util.USER_TABLE_NAME;
+        String DROP_TABLE = "DROP TABLE IF EXISTS " + Util.USER_TABLE_NAME;
         db.execSQL(DROP_TABLE);
         DROP_TABLE = "DROP TABLE IF EXISTS " + Util.FOOD_TABLE_NAME;
         db.execSQL(DROP_TABLE);
-
-
         onCreate(db);
     }
 
@@ -62,25 +58,26 @@ public class Database extends SQLiteOpenHelper {
     }
 
     public long addFood(Food food){
-        SQLiteDatabase db = this.getWritableDatabase();
-        ContentValues foodContentValues = new ContentValues();
-        foodContentValues.put(Util.FOOD_NAME, food.getName());
-        foodContentValues.put(Util.FOOD_IMAGE_ID, food.getImgID());
-        foodContentValues.put(Util.FOOD_DESCRIPTION, food.getDescription());
-        foodContentValues.put(Util.USER_ID, food.getUserID());
-        long newRow = db.insert(Util.FOOD_TABLE_NAME, null, foodContentValues);
-        db.close();
+        try{
+            SQLiteDatabase db = this.getWritableDatabase();
+            ContentValues foodContentValues = new ContentValues();
+            foodContentValues.put(Util.FOOD_NAME, food.getName());
+            Bitmap image = food.getImgBitmap();
+            ByteArrayOutputStream imageOutputStream = new ByteArrayOutputStream();
+            image.compress(Bitmap.CompressFormat.JPEG, 100,imageOutputStream);
+            byte[] imageByte = imageOutputStream.toByteArray();
+            foodContentValues.put(Util.FOOD_IMAGE, imageByte);
+            foodContentValues.put(Util.FOOD_DESCRIPTION, food.getDescription());
+            foodContentValues.put(Util.USER_ID, food.getUserID());
+            foodContentValues.put(Util.OWNER_ID, food.getOwnerID());
+            long newRow = db.insert(Util.FOOD_TABLE_NAME, null, foodContentValues);
+            db.close();
+            return newRow;
 
-//        SQLiteDatabase dbfooduser = this.getWritableDatabase();
-//        ContentValues contentValues = new ContentValues();
-//        contentValues.put(Util.USER_ID, food.getUserID());
-//        contentValues.put(Util.FOOD_ID, newRow);
-//        long nr = dbfooduser.insert(Util.USER_FOOD_TABLE_NAME, null, contentValues);
-//        dbfooduser.close();
-
-        Log.d(Util.DEBUG, "add food: " + newRow);
-//        Log.d(Util.DEBUG, "add food user: " + nr);
-        return newRow;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return  0;
     }
 
     public long fetchUser(String username, String password){
@@ -110,7 +107,7 @@ public class Database extends SQLiteOpenHelper {
 //                " LEFT JOIN " +  Util.USER_FOOD_TABLE_NAME + " ON " + Util.USER_FOOD_TABLE_NAME + "." + Util.USER_ID + "=" +
 //                Util.USER_TABLE_NAME + "." + Util.USER_ID + " WHERE " + Util.USER_TABLE_NAME + "." + Util.USER_ID + "=" + userID;
 
-        String query = "SELECT " + Util.FOOD_ID + "," + Util.FOOD_NAME + "," + Util.FOOD_IMAGE_ID + "," + Util.FOOD_DESCRIPTION + " FROM " + Util.FOOD_TABLE_NAME +
+        String query = "SELECT " + Util.FOOD_ID + "," + Util.FOOD_NAME + "," + Util.FOOD_IMAGE + "," + Util.FOOD_DESCRIPTION + "," + Util.OWNER_ID + " FROM " + Util.FOOD_TABLE_NAME +
                 " JOIN " + Util.USER_TABLE_NAME + " ON " + Util.FOOD_TABLE_NAME + "." + Util.USER_ID + "=" +
                 Util.USER_TABLE_NAME + "." + Util.USER_ID + " WHERE " + Util.USER_TABLE_NAME + "." +Util.USER_ID + "=" + userID;
         Log.d(Util.DEBUG, "here #4 ");
@@ -130,8 +127,9 @@ public class Database extends SQLiteOpenHelper {
             do{
                 int foodID = c.getInt(0);
                 String name = c.getString(1);
-                int foodImgID = c.getInt(2);
+                byte[] foodImg = c.getBlob (2);
                 String des = c.getString(3);
+                int owner = c.getInt(4);
                 Log.d(Util.DEBUG, "here #7 ");
                 if(foodID!=0 && name != null){
                     Log.d(Util.DEBUG, "here #8 ");
@@ -143,21 +141,26 @@ public class Database extends SQLiteOpenHelper {
                         food.setDescription(des);
                         Log.d(Util.DEBUG, "here #11 ");
                     }
-                    if(foodImgID != 0){
-                        food.setImgID(foodImgID);
-                        Log.d(Util.DEBUG, "here #12 ");
+//                    if(foodImg != null){
+//                        Bitmap img =
+//                        food.setImgBitmap(foodImg);
+//                        Log.d(Util.DEBUG, "here #12 ");
+//                    }
+                    if(owner != 0){
+                        food.setOwnerID(owner);
+                        Log.d(Util.DEBUG, "here #13 ");
                     }
                     list.add(food);
-                    Log.d(Util.DEBUG, "here #13 ");
+                    Log.d(Util.DEBUG, "here #14 ");
                 }
             }while (c.moveToNext());
-            Log.d(Util.DEBUG, "here #14 ");
+            Log.d(Util.DEBUG, "here #15 ");
         }
-        Log.d(Util.DEBUG, "here #15 ");
-        c.close();
         Log.d(Util.DEBUG, "here #16 ");
+        c.close();
+        Log.d(Util.DEBUG, "here #17 ");
         db.close();
-        Log.d(Util.DEBUG, "here #17 done ");
+        Log.d(Util.DEBUG, "here #18 done ");
         return list;
     }
 }
