@@ -10,94 +10,61 @@ import android.widget.TextView;
 import android.widget.Toast;
 import androidx.appcompat.app.AppCompatActivity;
 import android.os.Bundle;
+import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
+import com.example.foodapp.Adapter.FoodAdapter;
 import com.example.foodapp.Databasehelper.Database;
 import com.example.foodapp.Entity.Food;
+import com.example.foodapp.Entity.User;
 import com.example.foodapp.Util.Util;
 
 import java.util.List;
 
 public class HomeActivity extends AppCompatActivity {
     RecyclerView recyclerView;
-    TextView id1, name1, des1;
+    int userID;
     SharedPreferences sharedPreferences;
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_home);
-//        if(Util.fooduser_db == null){
-//            Log.d(Util.DEBUG, "Create Database");
-//            Util.fooduser_db = new Database(this,null);
-//        }
-//        long userID = 0;
-//        int loginState=0;
-//        Intent intent = getIntent();
-//
-//        if(intent != null){
-//            userID = intent.getLongExtra(Util.USER_ID, 0);
-//            sharedPreferences = getSharedPreferences(Util.LOGIN_STATE, MODE_PRIVATE);
-//            SharedPreferences.Editor editor = sharedPreferences.edit();
-//            editor.putInt(Util.USER_ID, (int) userID);
-//            editor.putInt(Util.LOGIN_STATE, (int) userID);
-//            Log.d(Util.DEBUG, "loginstate uid: " + userID);
-//            editor.commit();
-//        }else {
-//            sharedPreferences = getSharedPreferences(Util.LOGIN_STATE, MODE_PRIVATE);
-//            userID = sharedPreferences.getInt(Util.USER_ID, 0);
-//            loginState = sharedPreferences.getInt(Util.LOGIN_STATE, 0);
-//        }
-//        Toast.makeText(this, "logged in!", Toast.LENGTH_LONG).show();
-//        Log.d(Util.DEBUG, "loginstate: " + loginState);
-//
-//
-//        if( loginState > 0){
-//            Food cake = new Food("Cake");
-//            cake.setUserID((int)loginState);
-//            cake.setDescription("yummmmmm");
-//            Log.d(Util.DEBUG, loginState + " <- userID for food");
-//            long fooduserId = Util.fooduser_db.addFood(cake);
-//            Log.d(Util.DEBUG, fooduserId + " <- userID for food");
-//
-////            List<Food> foodList = Util.fooduser_db.fetchFood(loginState);
-////            Log.d(Util.DEBUG, "food size: " + foodList.size());
-////            if(foodList.size() > 0){
-////                Food food = foodList.get(0);
-////                name1 = findViewById(R.id.foodname);
-////                name1.setText(food.getName());
-////                id1 = findViewById(R.id.foodid);
-////                id1.setText(food.getFoodId() + "");
-////                des1 = findViewById(R.id.fooddescription);
-////                des1.setText(food.getDescription());
-////            }
-//
-//            SharedPreferences.Editor editor = sharedPreferences.edit();
-//            editor.putInt(Util.USER_ID, (int) userID);
-//            editor.putInt(Util.LOGIN_STATE, loginState);
-//            editor.commit();
-//        }
-//        SharedPreferences.Editor editor = sharedPreferences.edit();
-//        if(loginState > 0){
-//            editor.putInt(Util.LOGIN_STATE, loginState);
-//        }if (userID > 0){
-//            editor.putInt(Util.USER_ID, (int) userID);
-//        }
-//
-//        editor.commit();
-//
-//
-//        recyclerView = findViewById(R.id.recyclerView);
-//
-//
+        if(Util.fooduser_db == null){
+            Log.d(Util.DEBUG, "Create Database");
+            Util.fooduser_db = new Database(this,null);
+        }
+        Intent intent = getIntent();
+        sharedPreferences = getSharedPreferences(Util.LOGIN_STATE, MODE_PRIVATE);
+        if(intent.getIntExtra(Util.USER_ID, 0)==0){
+            if(sharedPreferences.getInt(Util.USER_ID, 0) == 0){
+                startActivity(new Intent(this, LoginActivity.class));
+            }else {
+                userID = sharedPreferences.getInt(Util.USER_ID, 0);
+                SharedPreferences.Editor editor = sharedPreferences.edit();
+                editor.putInt(Util.USER_ID, userID);
+                editor.commit();
+            }
+        }else {
+            userID = intent.getIntExtra(Util.USER_ID, 0);
+            SharedPreferences.Editor editor = sharedPreferences.edit();
+            editor.putInt(Util.USER_ID, userID);
+            editor.commit();
+        }
+        recyclerView = findViewById(R.id.recyclerView);
+        try {
+            Toast.makeText(this, userID+" : <= ID", Toast.LENGTH_LONG).show();
+            FoodAdapter adapter = new FoodAdapter(this, Util.fooduser_db.fetchFood(userID));
+            recyclerView.setLayoutManager(new LinearLayoutManager(this, RecyclerView.VERTICAL,false));
+            recyclerView.setAdapter(adapter);
 
-
-
-
-//        FoodAdapter adapter = new FoodAdapter(this);
-//        recyclerView.setAdapter();
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     public void addNewFood(View v){
-        startActivity(new Intent(this, NewFoodActivity.class));
+        Intent intent = new Intent(this, NewFoodActivity.class);
+        intent.putExtra(Util.USER_ID, userID);
+        startActivity(intent);
     }
 
     @Override

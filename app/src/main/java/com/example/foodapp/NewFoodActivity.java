@@ -19,9 +19,10 @@ import java.io.IOException;
 
 public class NewFoodActivity extends AppCompatActivity {
 ImageView imageView;
-TextView imageText;
+TextView imageText, title, description, location, time;
 Uri imageUri;
 Bitmap imageBitmap;
+int userId;
 
 
     @Override
@@ -30,6 +31,12 @@ Bitmap imageBitmap;
         setContentView(R.layout.activity_new_food);
         imageView = findViewById(R.id.iv_addNewFood);
         imageText = findViewById(R.id.tv_add_image_id);
+        title = findViewById(R.id.et_title_id);
+        description = findViewById(R.id.et_description_id);
+        location = findViewById(R.id.et_location);
+        time = findViewById(R.id.et_pickup);
+        userId = getIntent().getIntExtra(Util.USER_ID,0);
+
     }
 
     public void addImage(View v){
@@ -47,12 +54,16 @@ Bitmap imageBitmap;
     public void addFood(View v){
         try {
             if(imageBitmap!=null){
-                Food creeper = new Food("creeper");
-                creeper.setImgBitmap(imageBitmap);
-                Util.fooduser_db.addFood(creeper);
-                Toast.makeText(this, "add food succeed", Toast.LENGTH_LONG).show();
+                Food food = new Food(title.getText().toString());
+                food.setImgBitmap(imageBitmap);
+                food.setDescription(description.getText().toString());
+                food.setOwnerID(userId);
+                food.setUserID(userId);
+                Util.fooduser_db.addFood(food);
+                startActivity(new Intent(this, HomeActivity.class));
             }
         } catch (Exception e) {
+            Log.d("result: ",  " :Error addfoof?");
             e.printStackTrace();
         }
     }
@@ -65,6 +76,7 @@ Bitmap imageBitmap;
             try {
                 imageBitmap = MediaStore.Images.Media.getBitmap(getContentResolver(), imageUri);
                 imageView.setImageBitmap(imageBitmap);
+                imageText.setText("");
             } catch (IOException e) {
                 e.printStackTrace();
             }

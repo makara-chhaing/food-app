@@ -1,6 +1,7 @@
 package com.example.foodapp.Adapter;
 
 import android.content.Context;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -21,8 +22,9 @@ public class FoodAdapter extends RecyclerView.Adapter<FoodAdapter.FoodAdapterVie
     Database database = Util.fooduser_db;
     List<Food> foodList;
 
-    public FoodAdapter(Context context, Database database){
+    public FoodAdapter(Context context, List<Food> foods){
         this.context = context;
+        this.foodList = foods;
     }
     @NonNull
     @Override
@@ -33,12 +35,18 @@ public class FoodAdapter extends RecyclerView.Adapter<FoodAdapter.FoodAdapterVie
 
     @Override
     public void onBindViewHolder(@NonNull FoodAdapterViewHolder holder, int position) {
-
+        Food food = foodList.get(position);
+        Log.d("result: ", position+": position");
+        Log.d("result: ", food.getName() + " :header");
+        Log.d("result: ", food.getDescription() + " :description");
+        holder.imageView.setImageBitmap(food.getImgBitmap());
+        holder.header.setText(food.getName());
+        holder.body.setText(food.getDescription());
     }
 
     @Override
     public int getItemCount() {
-        return 0;
+        return foodList.size();
     }
 
     public class FoodAdapterViewHolder extends RecyclerView.ViewHolder {

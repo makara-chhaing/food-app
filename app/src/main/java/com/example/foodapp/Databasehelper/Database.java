@@ -8,6 +8,7 @@ import android.database.sqlite.SQLiteOpenHelper;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.util.Log;
+import android.widget.Toast;
 import androidx.annotation.Nullable;
 import com.example.foodapp.Entity.Food;
 import com.example.foodapp.Entity.User;
@@ -81,86 +82,49 @@ public class Database extends SQLiteOpenHelper {
     }
 
     public long fetchUser(String username, String password){
-        SQLiteDatabase db = this.getReadableDatabase();
-        Cursor cursor = db.query(Util.USER_TABLE_NAME,new String[]{Util.USER_ID}, Util.USERNAME + " =? AND " + Util.PASSWORD + " =? ",
-                new String[] {username, password}, null, null, null);
-        long userId = 0;
-        if (cursor != null && cursor.moveToFirst()) {
-            userId = cursor.getLong(0);
-            return userId;
+        try{
+            SQLiteDatabase db = this.getReadableDatabase();
+            Cursor cursor = db.query(Util.USER_TABLE_NAME,new String[]{Util.USER_ID}, Util.USERNAME + " =? AND " + Util.PASSWORD + " =? ",
+                    new String[] {username, password}, null, null, null);
+            long userId = 0;
+            if (cursor != null && cursor.moveToFirst()) {
+                userId = cursor.getLong(0);
+                return userId;
+            }
+            cursor.close();
+            db.close();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-
-        Log.d(Util.DEBUG, "rowNum: " + userId);
-        assert cursor != null;
-        cursor.close();
-        db.close();
         return 0;
     }
 
     public List<Food> fetchFood(int userID){
-        Log.d(Util.DEBUG, "here #1 ");
         List<Food> list = new ArrayList<>();
-        Log.d(Util.DEBUG, "here #2 ");
         SQLiteDatabase db = this.getReadableDatabase();
-        Log.d(Util.DEBUG, "here #3 ");
-//        String query = "SELECT " + Util.FOOD_ID + "," + Util.FOOD_NAME + "," + Util.FOOD_IMAGE_ID + "," + Util.FOOD_DESCRIPTION + " FROM " + Util.FOOD_TABLE_NAME +
-//                " LEFT JOIN " +  Util.USER_FOOD_TABLE_NAME + " ON " + Util.USER_FOOD_TABLE_NAME + "." + Util.USER_ID + "=" +
-//                Util.USER_TABLE_NAME + "." + Util.USER_ID + " WHERE " + Util.USER_TABLE_NAME + "." + Util.USER_ID + "=" + userID;
-
         String query = "SELECT " + Util.FOOD_ID + "," + Util.FOOD_NAME + "," + Util.FOOD_IMAGE + "," + Util.FOOD_DESCRIPTION + "," + Util.OWNER_ID + " FROM " + Util.FOOD_TABLE_NAME +
                 " JOIN " + Util.USER_TABLE_NAME + " ON " + Util.FOOD_TABLE_NAME + "." + Util.USER_ID + "=" +
                 Util.USER_TABLE_NAME + "." + Util.USER_ID + " WHERE " + Util.USER_TABLE_NAME + "." +Util.USER_ID + "=" + userID;
-        Log.d(Util.DEBUG, "here #4 ");
         Cursor c = db.rawQuery(query, null);
-        Log.d(Util.DEBUG, "here #5 ");
-//        Cursor c = db.query(
-//                Util.FOOD_TABLE_NAME,
-//                new String[]{Util.FOOD_ID, Util.FOOD_NAME,Util.FOOD_IMAGE_ID,Util.FOOD_DESCRIPTION},
-//                Util.USER_ID + "=?",
-//                new String[]{userID+""},
-//                null,
-//                null,
-//                Util.FOOD_ID + " ASC"
-//        );
         if(c.moveToNext()){
-            Log.d(Util.DEBUG, "here #6 ");
             do{
                 int foodID = c.getInt(0);
                 String name = c.getString(1);
                 byte[] foodImg = c.getBlob (2);
                 String des = c.getString(3);
                 int owner = c.getInt(4);
-                Log.d(Util.DEBUG, "here #7 ");
-                if(foodID!=0 && name != null){
-                    Log.d(Util.DEBUG, "here #8 ");
-                    Food food = new Food(name);
-                    Log.d(Util.DEBUG, "here #9 ");
-                    food.setUserID(userID);
-                    Log.d(Util.DEBUG, "here #10 ");
-                    if(des != null){
-                        food.setDescription(des);
-                        Log.d(Util.DEBUG, "here #11 ");
-                    }
-//                    if(foodImg != null){
-//                        Bitmap img =
-//                        food.setImgBitmap(foodImg);
-//                        Log.d(Util.DEBUG, "here #12 ");
-//                    }
-                    if(owner != 0){
-                        food.setOwnerID(owner);
-                        Log.d(Util.DEBUG, "here #13 ");
-                    }
-                    list.add(food);
-                    Log.d(Util.DEBUG, "here #14 ");
-                }
+                Food food = new Food(name);
+                food.setUserID(userID);
+                food.setDescription(des);
+                Bitmap img = BitmapFactory.decodeByteArray(foodImg,0, foodImg.length);
+                food.setImgBitmap(img);
+                food.setOwnerID(owner);
+                list.add(food);
             }while (c.moveToNext());
-            Log.d(Util.DEBUG, "here #15 ");
         }
-        Log.d(Util.DEBUG, "here #16 ");
         c.close();
-        Log.d(Util.DEBUG, "here #17 ");
         db.close();
-        Log.d(Util.DEBUG, "here #18 done ");
+
         return list;
     }
 }

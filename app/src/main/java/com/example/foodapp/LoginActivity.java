@@ -36,7 +36,7 @@ public class LoginActivity extends AppCompatActivity {
             Log.d(Util.DEBUG, "result: " + result);
             if(result > 0){
                 Intent intent = new Intent(this, HomeActivity.class);
-                intent.putExtra(Util.USER_ID, result);
+                intent.putExtra(Util.USER_ID, (int) result);
                 Log.d(Util.DEBUG, result + " <- userID");
                 startActivity(intent);
                 finish();
